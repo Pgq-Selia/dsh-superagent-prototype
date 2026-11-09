@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="输入身高和体重，计算身体质量指数（BMI）并查看所属范围。"
+    />
+    <title>BMI 计算器</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%232f6fed'/%3E%3Cpath%20d='M20%2040l8-16%208%208%208-12'%20stroke='white'%20stroke-width='6'%20fill='none'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="calculator" aria-labelledby="page-title">
+      <header class="intro">
+        <p class="eyebrow">健康小工具</p>
+        <h1 id="page-title">BMI 计算器</h1>
+        <p class="lede">输入身高和体重，看看你的身体质量指数。</p>
+      </header>
+
+      <form id="bmi-form" class="form" novalidate>
+        <div class="field">
+          <label for="height">身高</label>
+          <div class="control">
+            <input
+              id="height"
+              name="height"
+              type="number"
+              inputmode="decimal"
+              min="50"
+              max="250"
+              step="0.1"
+              placeholder="170"
+              autocomplete="off"
+              aria-describedby="height-error"
+            />
+            <span class="unit" aria-hidden="true">cm</span>
+          </div>
+          <p id="height-error" class="error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="weight">体重</label>
+          <div class="control">
+            <input
+              id="weight"
+              name="weight"
+              type="number"
+              inputmode="decimal"
+              min="10"
+              max="300"
+              step="0.1"
+              placeholder="65"
+              autocomplete="off"
+              aria-describedby="weight-error"
+            />
+            <span class="unit" aria-hidden="true">kg</span>
+          </div>
+          <p id="weight-error" class="error" aria-live="polite"></p>
+        </div>
+
+        <button type="submit" class="submit">计算 BMI</button>
+      </form>
+
+      <p id="result-status" class="visually-hidden" role="status" aria-live="polite"></p>
+
+      <section id="result" class="result" hidden data-category="normal">
+        <p class="result-eyebrow">你的 BMI</p>
+        <div class="result-headline">
+          <output id="bmi-value" class="bmi-value" for="height weight">—</output>
+          <span class="bmi-unit">kg/m²</span>
+          <span id="bmi-category" class="badge">—</span>
+        </div>
+        <p id="bmi-summary" class="summary"></p>
+
+        <div class="gauge">
+          <div class="gauge-rail">
+            <div class="gauge-track" aria-hidden="true">
+              <span class="segment segment-underweight"></span>
+              <span class="segment segment-normal"></span>
+              <span class="segment segment-overweight"></span>
+              <span class="segment segment-obese"></span>
+            </div>
+            <span id="bmi-marker" class="marker" aria-hidden="true"></span>
+          </div>
+          <div class="gauge-scale" aria-hidden="true">
+            <span class="tick" style="left: 17.5%">18.5</span>
+            <span class="tick" style="left: 45%">24</span>
+            <span class="tick" style="left: 65%">28</span>
+          </div>
+        </div>
+
+        <p class="healthy-range">
+          <span class="healthy-label">健康体重范围</span>
+          <span id="healthy-range-value">—</span>
+        </p>
+      </section>
+
+      <p class="note">
+        BMI = 体重（kg）÷ 身高（m）²。结果仅供参考，不能代替医学诊断。中国成人标准：<span class="nowrap">偏瘦 &lt; 18.5</span>、<span class="nowrap">正常 18.5–23.9</span>、<span class="nowrap">超重 24–27.9</span>、<span class="nowrap">肥胖 ≥ 28</span>。
+      </p>
+    </main>
+
+    <script src="./calculator.js" defer></script>
+  </body>
+</html>
