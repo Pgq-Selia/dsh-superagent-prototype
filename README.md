@@ -37,3 +37,7 @@ Read the numbered documents in order; each builds only on the ones before it.
 ## License
 
 [MIT](LICENSE)
+
+## Getting help
+
+If you have a question, open an issue in this repository and mention @Pgq-Selia. Describe what you tried and what you expected to happen, so the answer can be specific.
