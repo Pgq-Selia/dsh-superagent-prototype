@@ -154,6 +154,8 @@ const newRound = (signal?: AbortSignal): Round => ({ started: new Date().toISOSt
 const stopped = (ctx: SourceContext, round: Round): boolean => !!round.signal?.aborted || !ctx.config(SOURCE)
 export interface Retry { since: string; pr: boolean; failedAt?: string; attempts?: number }
 const RETRY_WINDOW_MS = 24 * 3600_000
+/** How far before the cursor a notified thread is re-read, covering the delay between a comment and its notification. */
+const NOTIFICATION_LAG_MS = 120_000
 /** True when GitHub returns HTTP 410 (Gone); HTTP 404 is retried because it can indicate revoked access to a private repository. */
 const deleted = (error: unknown): boolean => error instanceof CliError && error.code === 410
 /** Records a failed read on the Thread and in the round; deleted (410) or abandoned (24h+) threads do not fail the round. */
@@ -313,6 +315,13 @@ async function pollNotifications(ctx: SourceContext, round: Round): Promise<{ co
     ? await commands.pages(NotificationSchema, path, round.tally)
     : validItems(NotificationSchema, z.array(z.unknown()).parse(JSON.parse(body)), round.tally)
   const retries = { ...state.get(KV.github.retries) }
+  // GitHub updates the notification seconds after the comment it names, so a poll that advanced the cursor in between
+  // would never read that comment again. Each notified thread therefore starts a little before the cursor; trigger ids
+  // deduplicate the overlap.
+  const laggedFrom = (number: number): string => {
+    const base = Math.min(Date.parse(state.get(KV.github.cursor(number)) ?? since), Date.parse(since))
+    return new Date(base - NOTIFICATION_LAG_MS).toISOString()
+  }
   // Failed items from the previous round run first, followed by newly notified items in chronological order; each is read once.
   const items = new Map(Object.entries(retries).map(([number, retry]) => [Number(number), retry]))
   for (const notification of notifications.reverse()) {
@@ -320,7 +329,7 @@ async function pollNotifications(ctx: SourceContext, round: Round): Promise<{ co
     const address = githubAddress(notification.subject.url ?? '', repository)
     if (!address || address.discussion || items.has(address.number)) continue
     const { number, pr } = address
-    items.set(number, { since: [state.get(KV.github.cursor(number)) ?? since, since].sort().at(-1)!, pr })
+    items.set(number, { since: laggedFrom(number), pr })
   }
   for (const [number, item] of items) {
     if (stopped(ctx, round)) return { count: notifications.length, interval }
